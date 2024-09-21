@@ -1,15 +1,16 @@
-import { Order } from "src/module/order/entities/order.entity";
-import { Product } from "src/module/product/entities/product.entity";
-import { Column, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Order } from "../../order/entities/order.entity";
+import { Product } from "../../product/entities/product.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
+@Entity("orderProduct")
 export class OrderProduct {
     @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Order, order => order.orderItems)
+  @ManyToOne(() => Order, order => order.orderProduct)
   order: Order;
 
-  @ManyToOne(() => Product, product => product.orderItems)
+  @ManyToOne(() => Product, product => product.orderProduct)
   product: Product;
 
   @Column('int')

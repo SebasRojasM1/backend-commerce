@@ -1,4 +1,5 @@
-import { User } from "src/module/user/entities/user.entity";
+import { OrderProduct } from "../../order-product/entities/order-product.entity";
+import { User } from "../../user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('orders')
@@ -21,6 +22,6 @@ export class Order {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => OrderItem, orderItem => orderItem.order)
-  orderItems: OrderItem[];
+  @OneToMany(() => OrderProduct, OrderProduct => OrderProduct.order)
+  OrderProduct: OrderProduct[];
 }

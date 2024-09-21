@@ -1,4 +1,4 @@
-import { Order } from "src/module/order/entities/order.entity";
+import { Order } from "../../order/entities/order.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('payments')
