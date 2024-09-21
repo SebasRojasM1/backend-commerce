@@ -6,10 +6,11 @@ import { OrderProductModule } from './module/order-product/order-product.module'
 import { PaymentModule } from './module/payment/payment.module';
 import { ReviewModule } from './module/review/review.module';
 import { AddressModule } from './module/address/address.module';
+import { InventoryModule } from './module/inventory/inventory.module';
 
 
 @Module({
-  imports: [ProductModule, CategoryModule, OrderModule, OrderProductModule, PaymentModule, ReviewModule, AddressModule],
+  imports: [ProductModule, CategoryModule, OrderModule, OrderProductModule, PaymentModule, ReviewModule, AddressModule, InventoryModule],
   controllers: [],
   providers: [],
 })
