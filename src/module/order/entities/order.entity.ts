@@ -23,5 +23,5 @@ export class Order {
   updatedAt: Date;
 
   @OneToMany(() => OrderProduct, OrderProduct => OrderProduct.order)
-  OrderProduct: OrderProduct[];
+  OrderProducts: OrderProduct[];
 }
