@@ -1,1 +1,14 @@
-export class CreateInventoryDto {}
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsNumber } from "class-validator";
+
+export class CreateInventoryDto {
+    @ApiProperty()
+    @IsNotEmpty()
+  @IsNumber()
+  productId: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  quantity: number;
+}

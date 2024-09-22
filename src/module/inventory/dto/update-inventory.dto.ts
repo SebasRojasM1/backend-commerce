@@ -1,4 +1,14 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateInventoryDto } from './create-inventory.dto';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
-export class UpdateInventoryDto extends PartialType(CreateInventoryDto) {}
+export class UpdateInventoryDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  productId: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  quantity: number;
+}

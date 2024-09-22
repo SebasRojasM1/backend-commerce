@@ -34,7 +34,7 @@ export class Product {
   updatedAt: Date;
 
   @OneToMany(() => OrderProduct, orderProduct => orderProduct.product)
-  OrderProduct: OrderProduct[];
+  OrderProducts: OrderProduct[];
 
   @OneToMany(() => Review, review => review.product)
   reviews: Review[];
