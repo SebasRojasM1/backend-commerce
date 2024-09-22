@@ -1,4 +1,24 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreatePaymentDto } from './create-payment.dto';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEnum, IsNotEmpty, IsNumber } from "class-validator";
 
-export class UpdatePaymentDto extends PartialType(CreatePaymentDto) {}
+export class UpdatePaymentDto {
+    @ApiProperty()
+    @IsNotEmpty()
+  @IsNumber()
+  orderId: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
+  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsEnum(['pending', 'completed', 'failed'])
+  status: 'pending' | 'completed' | 'failed';
+}
