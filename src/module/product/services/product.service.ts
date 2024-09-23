@@ -1,26 +1,80 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
-
+/* eslint-disable prettier/prettier */
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateProductDto, UpdateProductDto } from '../dto';
+import { Product } from '../entities/product.entity';
+import { Category } from 'src/module/category/entities/category.entity';
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectRepository(Product) private readonly productRepository: Repository<Product>,
+    @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
+  ) {}
+
+  async createProduct(createProductDto: CreateProductDto) {
+    const existingProduct = await this.productRepository.findOneBy({ name: createProductDto.name });
+
+    if (existingProduct) {
+      throw new BadRequestException('Product already exists.');
+    }
+
+    const category = await this.categoryRepository.findOneBy({ id: createProductDto.categoryId });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const product = this.productRepository.create({
+      ...createProductDto,
+      category,
+    });
+
+    return await this.productRepository.save(product);
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll() {
+    return await this.productRepository.find({ relations: ['category'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: number) {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async updateProduct(id: number, updateProductDto: UpdateProductDto) {
+    const product = await this.productRepository.findOneBy({ id });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (updateProductDto.categoryId) {
+      const category = await this.categoryRepository.findOneBy({ id: updateProductDto.categoryId });
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+      product.category = category;
+    }
+
+    Object.assign(product, updateProductDto);
+    await this.productRepository.save(product);
+    return product;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async deleteProduct(id: number) {
+    const product = await this.productRepository.findOneBy({ id });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    await this.productRepository.softDelete({ id });
+    return product;
   }
 }
