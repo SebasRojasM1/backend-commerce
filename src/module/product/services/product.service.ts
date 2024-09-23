@@ -1,83 +1,80 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateProductDto, UpdateProductDto } from '../dto';
 import { Product } from '../entities/product.entity';
 import { Category } from 'src/module/category/entities/category.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectRepository(Product) private readonly productModel: Repository<Product>,
-    @InjectRepository(Category) private readonly categoryModel: Repository<Category>,
+    @InjectRepository(Product) private readonly productRepository: Repository<Product>,
+    @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    const { name, categoryId } = createProductDto;
+  async createProduct(createProductDto: CreateProductDto) {
+    const existingProduct = await this.productRepository.findOneBy({ name: createProductDto.name });
 
-    // Check if the product already exists
-    const existingProduct = await this.productModel.findOne({ name }).exec();
     if (existingProduct) {
       throw new BadRequestException('Product already exists.');
     }
 
-    // Validate the category exists
-    const category = await this.categoryModel.findById(categoryId).exec();
+    const category = await this.categoryRepository.findOneBy({ id: createProductDto.categoryId });
     if (!category) {
-      throw new NotFoundException('Category not found.');
+      throw new NotFoundException('Category not found');
     }
 
-    // Create the product
-    const product = new this.productModel({
+    const product = this.productRepository.create({
       ...createProductDto,
-      category, // Add the category reference
+      category,
     });
-    return product.save();
+
+    return await this.productRepository.save(product);
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel.find().populate('category').exec(); // Populate the category data
+  async findAll() {
+    return await this.productRepository.find({ relations: ['category'] });
   }
 
-  async findOne(id: string): Promise<Product> {
-    const product = await this.productModel.findById(id).populate('category').exec();
+  async findOne(id: number) {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
+
     if (!product) {
-      throw new NotFoundException('Product not found.');
+      throw new NotFoundException('Product not found');
     }
+
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
-    const { categoryId } = updateProductDto;
-
-    // Validate if the product exists
-    const product = await this.productModel.findById(id).exec();
+  async updateProduct(id: number, updateProductDto: UpdateProductDto) {
+    const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new NotFoundException('Product not found.');
+      throw new NotFoundException('Product not found');
     }
 
-    // Validate if a new category is being provided
-    if (categoryId) {
-      const category = await this.categoryModel.findById(categoryId).exec();
+    if (updateProductDto.categoryId) {
+      const category = await this.categoryRepository.findOneBy({ id: updateProductDto.categoryId });
       if (!category) {
-        throw new NotFoundException('Category not found.');
+        throw new NotFoundException('Category not found');
       }
       product.category = category;
     }
 
-    // Update product data
     Object.assign(product, updateProductDto);
-
-    return product.save();
+    await this.productRepository.save(product);
+    return product;
   }
 
-  async remove(id: string): Promise<Product> {
-    const product = await this.productModel.findByIdAndRemove(id).exec();
+  async deleteProduct(id: number) {
+    const product = await this.productRepository.findOneBy({ id });
     if (!product) {
-      throw new NotFoundException('Product not found.');
+      throw new NotFoundException('Product not found');
     }
+
+    await this.productRepository.softDelete({ id });
     return product;
   }
 }
